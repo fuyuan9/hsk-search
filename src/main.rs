@@ -295,6 +295,26 @@ fn run_app(terminal: &mut Terminal<CrosstermBackend<io::Stdout>>, mut app: App) 
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let args: Vec<String> = std::env::args().collect();
+    if args.len() > 1 {
+        match args[1].as_str() {
+            "-v" | "--version" => {
+                println!("hsk {}", env!("CARGO_PKG_VERSION"));
+                return Ok(());
+            }
+            "-h" | "--help" => {
+                println!("hsk - High-precision HSK 3.0 Chinese Hanzi & Word Search Client\n");
+                println!("USAGE:\n    hsk [OPTIONS]\n");
+                println!("OPTIONS:\n    -h, --help       Print help information");
+                println!("    -v, --version    Print version information\n");
+                println!("TUI CONTROLS:\n    Start typing to search immediately (Insert mode)");
+                println!("    Press Esc to enter Normal mode for Vim-style hjkl navigation");
+                return Ok(());
+            }
+            _ => {}
+        }
+    }
+
     set_panic_hook();
 
     let items =

@@ -1,0 +1,96 @@
+#!/usr/bin/env node
+
+/**
+ * Helper to generate or update Formula/hsk.rb for fuyuan9/homebrew-tap
+ * Usage: node scripts/generate_homebrew_formula.mjs [version]
+ */
+
+import fs from 'node:fs';
+import path from 'node:path';
+
+const version = process.argv[2] || '0.1.0';
+const cleanVersion = version.replace(/^v/, '');
+
+async function getSha256(url) {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const text = await res.text();
+    const hash = text.trim().split(/\s+/)[0];
+    return hash;
+  } catch (err) {
+    return "PENDING_RELEASE_SHA256";
+  }
+}
+
+async function main() {
+  const baseUrl = `https://github.com/fuyuan9/hsk-search/releases/download/v${cleanVersion}`;
+
+  const macArmSha = await getSha256(`${baseUrl}/hsk-v${cleanVersion}-aarch64-apple-darwin.tar.gz.sha256`);
+  const macIntelSha = await getSha256(`${baseUrl}/hsk-v${cleanVersion}-x86_64-apple-darwin.tar.gz.sha256`);
+  const linuxX64Sha = await getSha256(`${baseUrl}/hsk-v${cleanVersion}-x86_64-unknown-linux-gnu.tar.gz.sha256`);
+  const linuxArmSha = await getSha256(`${baseUrl}/hsk-v${cleanVersion}-aarch64-unknown-linux-gnu.tar.gz.sha256`);
+
+  const formulaContent = `# typed: false
+# frozen_string_literal: true
+
+class Hsk < Formula
+  desc "High-precision HSK 3.0 Chinese Hanzi & Word search TUI client"
+  homepage "https://github.com/fuyuan9/hsk-search"
+  version "${cleanVersion}"
+  license "MIT"
+
+  on_macos do
+    if Hardware::CPU.arm?
+      url "https://github.com/fuyuan9/hsk-search/releases/download/v#{version}/hsk-v#{version}-aarch64-apple-darwin.tar.gz"
+      sha256 "${macArmSha}"
+    else
+      url "https://github.com/fuyuan9/hsk-search/releases/download/v#{version}/hsk-v#{version}-x86_64-apple-darwin.tar.gz"
+      sha256 "${macIntelSha}"
+    end
+  end
+
+  on_linux do
+    if Hardware::CPU.arm?
+      url "https://github.com/fuyuan9/hsk-search/releases/download/v#{version}/hsk-v#{version}-aarch64-unknown-linux-gnu.tar.gz"
+      sha256 "${linuxArmSha}"
+    else
+      url "https://github.com/fuyuan9/hsk-search/releases/download/v#{version}/hsk-v#{version}-x86_64-unknown-linux-gnu.tar.gz"
+      sha256 "${linuxX64Sha}"
+    end
+  end
+
+  def install
+    bin.install "hsk"
+  end
+
+  test do
+    assert_match "hsk #{version}", shell_output("#{bin}/hsk --version")
+  end
+end
+`;
+
+  // Output locally in hsk-search
+  const outDir = path.resolve('Formula');
+  if (!fs.existsSync(outDir)) {
+    fs.mkdirSync(outDir, { recursive: true });
+  }
+  const outFile = path.join(outDir, 'hsk.rb');
+  fs.writeFileSync(outFile, formulaContent, 'utf-8');
+
+  // Also write to /Users/fuyuan/Desktop/homebrew-tap if present
+  const tapDir = path.resolve('/Users/fuyuan/Desktop/homebrew-tap');
+  if (fs.existsSync(tapDir)) {
+    const tapFormulaDir = path.join(tapDir, 'Formula');
+    if (!fs.existsSync(tapFormulaDir)) {
+      fs.mkdirSync(tapFormulaDir, { recursive: true });
+    }
+    const tapOutFile = path.join(tapFormulaDir, 'hsk.rb');
+    fs.writeFileSync(tapOutFile, formulaContent, 'utf-8');
+  }
+}
+
+main().catch(err => {
+  console.error(err);
+  process.exit(1);
+});

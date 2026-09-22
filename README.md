@@ -79,25 +79,85 @@ All commits and pull requests are verified via GitHub Actions (`.github/workflow
 
 ---
 
-## Keybindings
 
-| Key | Action |
-| :--- | :--- |
-| `[Any character]` | Type into search box |
-| `[Esc]` | Clear search query (if typed) / Exit application |
-| `[Ctrl+C]` / `[Ctrl+Q]` | Force quit |
-| `[Ctrl+U]` | Clear search box |
-| `[Tab]` / `[Shift+Tab]` | Cycle HSK Level filter (`All` &rarr; `HSK 1` ... `HSK 7-9`) |
-| `[F1]` | Cycle Entry Kind (`All` &rarr; `Words` &rarr; `Hanzi`) |
-| `[↑]` / `[↓]` | Select previous / next item |
-| `[PgUp]` / `[PgDn]` | Scroll table by 10 items |
-| `[Left]` / `[Right]` | Move cursor in search box |
-| `[Home]` / `[End]` | Move cursor to start / end of search box |
-| `[Backspace]` / `[Del]`| Delete character |
-| `[F2]` or `[?]` | Toggle Help & About modal window |
+## Installation
+
+### Via Homebrew (macOS / Linux) - Recommended
+
+```bash
+brew install fuyuan9/tap/hsk
+```
+
+Or tap first and install:
+```bash
+brew tap fuyuan9/tap
+brew install hsk
+```
+
+### Via GitHub Releases (Pre-compiled Binaries)
+
+Download the binary archive matching your platform from the [GitHub Releases](https://github.com/fuyuan9/hsk-search/releases) page:
+- **macOS (Apple Silicon M1/M2/M3/M4)**: `hsk-v*-aarch64-apple-darwin.tar.gz`
+- **macOS (Intel)**: `hsk-v*-x86_64-apple-darwin.tar.gz`
+- **Linux (x86_64)**: `hsk-v*-x86_64-unknown-linux-gnu.tar.gz`
+- **Linux (ARM64)**: `hsk-v*-aarch64-unknown-linux-gnu.tar.gz`
+- **Windows (x64)**: `hsk-v*-x86_64-pc-windows-msvc.zip`
+
+Extract and move `hsk` to a directory in your `$PATH` (such as `/usr/local/bin`).
+
+### Via Cargo (From Source)
+
+```bash
+git clone https://github.com/fuyuan9/hsk-search.git
+cd hsk-search
+cargo install --path .
+```
 
 ---
 
+## Keybindings & Navigation
+
+`hsk` provides a Vim-style modal navigation system to prevent collisions between pinyin input (`h, j, k, l`) and list traversal. You can also click directly on any UI section with your mouse.
+
+### Normal Mode (Browsing & Inspection)
+Press `Esc` or `Enter` from Insert mode, or click on the results table or inspector card.
+
+| Key | Action |
+| :--- | :--- |
+| `j` / `↓` | Next item |
+| `k` / `↑` | Previous item |
+| `h` / `←` / `Shift+Tab` | Previous HSK level |
+| `l` / `→` / `Tab` | Next HSK level |
+| `gg` | Jump to first item |
+| `G` | Jump to last item |
+| `Ctrl+D` / `PgDn` | Scroll half-page down |
+| `Ctrl+U` / `PgUp` | Scroll half-page up |
+| `i` / `a` / `/` | Switch to **Insert mode** |
+| `c` / `C` | Clear search query and switch to **Insert mode** |
+| `K` / `F1` | Cycle Entry Kind (`All` → `Words` → `Hanzi`) |
+| `?` / `F2` | Toggle Help & About modal window |
+| `q` / `Ctrl+C` | Quit application |
+
+### Insert Mode (Instant Search)
+Starts in this mode automatically.
+
+| Key | Action |
+| :--- | :--- |
+| `[Any character]` | Type pinyin (`nihao`), initials (`yh`), hanzi (`中国`), or english (`bank`) |
+| `Esc` / `Enter` | Return to **Normal mode** |
+| `Ctrl+J` / `Ctrl+N` | Select next item without leaving Insert mode |
+| `Ctrl+K` / `Ctrl+P` | Select previous item without leaving Insert mode |
+| `Ctrl+W` | Delete word backward |
+| `Ctrl+U` | Clear search line |
+| `Tab` / `Shift+Tab` | Cycle HSK level filter |
+
+### Mouse Support
+- **Click Search Bar**: Automatically enters **Insert mode** and focuses cursor.
+- **Click Results Table**: Automatically enters **Normal mode** and selects the clicked row.
+- **Click Inspector Card**: Enters **Normal mode**.
+- **Mouse Wheel**: Scrolls list items up / down.
+
+---
 ## Building and Running
 
 ### Prerequisites
