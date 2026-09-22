@@ -1,0 +1,13 @@
+{
+  "name": "hsk-search-data-builder",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Offline pre-indexer for HSK 3.0 dataset with PinyinPro validation and SHA-256 integrity checks",
+  "type": "module",
+  "scripts": {
+    "build-data": "node build_dataset.mjs"
+  },
+  "dependencies": {
+    "pinyin-pro": "3.29.4"
+  }
+}

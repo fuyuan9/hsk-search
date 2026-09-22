@@ -1,0 +1,27 @@
+[package]
+name = "hsk-search"
+version = "0.1.0"
+edition = "2021"
+description = "High-precision HSK 3.0 Chinese Hanzi and Word search TUI client using Ratatui and PinyinPro-verified data"
+authors = ["fuyuan9 <fu9fu9fu9+fuyuan9@gmail.com>"]
+license = "MIT"
+repository = "https://github.com/fuyuan9/hsk-search"
+readme = "README.md"
+
+[[bin]]
+name = "hsk"
+path = "src/main.rs"
+
+[dependencies]
+crossterm = "0.28"
+ratatui = "0.30.2"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+unicode-width = "0.2"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
