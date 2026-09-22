@@ -98,7 +98,6 @@ brew install hsk
 
 Download the binary archive matching your platform from the [GitHub Releases](https://github.com/fuyuan9/hsk-search/releases) page:
 - **macOS (Apple Silicon M1/M2/M3/M4)**: `hsk-v*-aarch64-apple-darwin.tar.gz`
-- **macOS (Intel)**: `hsk-v*-x86_64-apple-darwin.tar.gz`
 - **Linux (x86_64)**: `hsk-v*-x86_64-unknown-linux-gnu.tar.gz`
 - **Linux (ARM64)**: `hsk-v*-aarch64-unknown-linux-gnu.tar.gz`
 - **Windows (x64)**: `hsk-v*-x86_64-pc-windows-msvc.zip`
