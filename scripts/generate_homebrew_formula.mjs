@@ -5,30 +5,36 @@
  * Usage: node scripts/generate_homebrew_formula.mjs [version]
  */
 
+import { execSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 
 const version = process.argv[2] || '0.1.0';
 const cleanVersion = version.replace(/^v/, '');
 
-async function getSha256(url) {
+function getReleaseDigests(ver) {
   try {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const text = await res.text();
-    const hash = text.trim().split(/\s+/)[0];
-    return hash;
+    const raw = execSync(`gh release view v${ver} --json assets`, { encoding: 'utf-8' });
+    const data = JSON.parse(raw);
+    const map = {};
+    for (const asset of data.assets || []) {
+      if (asset.digest && asset.digest.startsWith('sha256:')) {
+        map[asset.name] = asset.digest.replace('sha256:', '');
+      }
+    }
+    return map;
   } catch (err) {
-    return "PENDING_RELEASE_SHA256";
+    console.error('Warning: failed to query gh release assets:', err.message);
+    return {};
   }
 }
 
 async function main() {
-  const baseUrl = `https://github.com/fuyuan9/hsk-search/releases/download/v${cleanVersion}`;
+  const digests = getReleaseDigests(cleanVersion);
 
-  const macArmSha = await getSha256(`${baseUrl}/hsk-v${cleanVersion}-aarch64-apple-darwin.tar.gz.sha256`);
-  const linuxX64Sha = await getSha256(`${baseUrl}/hsk-v${cleanVersion}-x86_64-unknown-linux-gnu.tar.gz.sha256`);
-  const linuxArmSha = await getSha256(`${baseUrl}/hsk-v${cleanVersion}-aarch64-unknown-linux-gnu.tar.gz.sha256`);
+  const macArmSha = digests[`hsk-v${cleanVersion}-aarch64-apple-darwin.tar.gz`] || "PENDING_RELEASE_SHA256";
+  const linuxX64Sha = digests[`hsk-v${cleanVersion}-x86_64-unknown-linux-gnu.tar.gz`] || "PENDING_RELEASE_SHA256";
+  const linuxArmSha = digests[`hsk-v${cleanVersion}-aarch64-unknown-linux-gnu.tar.gz`] || "PENDING_RELEASE_SHA256";
 
   const formulaContent = `# typed: false
 # frozen_string_literal: true
@@ -73,6 +79,7 @@ end
   }
   const outFile = path.join(outDir, 'hsk.rb');
   fs.writeFileSync(outFile, formulaContent, 'utf-8');
+  console.log(`Updated ${outFile}`);
 
   // Also update /Users/fuyuan/Desktop/homebrew-tap if present
   const tapDir = path.resolve('/Users/fuyuan/Desktop/homebrew-tap');
@@ -83,6 +90,7 @@ end
     }
     const tapOutFile = path.join(tapFormulaDir, 'hsk.rb');
     fs.writeFileSync(tapOutFile, formulaContent, 'utf-8');
+    console.log(`Updated ${tapOutFile}`);
   }
 }
 
