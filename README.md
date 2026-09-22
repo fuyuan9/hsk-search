@@ -8,6 +8,10 @@ A blazingly fast, terminal-based Chinese character and vocabulary search client 
 
 It combines the unrivaled **99.85% polyphone precision** of TypeScript's [pinyin-pro](https://github.com/zh-lx/pinyin-pro) with the speed, memory safety, and zero-dependency portability of a **100% pure Rust** application.
 
+<p align="center">
+  <img src="docs/screenshot.png" alt="HSK Search TUI Client" width="850">
+</p>
+
 ---
 
 ## Features
