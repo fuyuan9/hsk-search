@@ -11,9 +11,6 @@ class Hsk < Formula
     if Hardware::CPU.arm?
       url "https://github.com/fuyuan9/hsk-search/releases/download/v#{version}/hsk-v#{version}-aarch64-apple-darwin.tar.gz"
       sha256 "PENDING_RELEASE_SHA256"
-    else
-      url "https://github.com/fuyuan9/hsk-search/releases/download/v#{version}/hsk-v#{version}-x86_64-apple-darwin.tar.gz"
-      sha256 "PENDING_RELEASE_SHA256"
     end
   end
 

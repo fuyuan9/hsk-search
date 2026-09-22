@@ -27,7 +27,6 @@ async function main() {
   const baseUrl = `https://github.com/fuyuan9/hsk-search/releases/download/v${cleanVersion}`;
 
   const macArmSha = await getSha256(`${baseUrl}/hsk-v${cleanVersion}-aarch64-apple-darwin.tar.gz.sha256`);
-  const macIntelSha = await getSha256(`${baseUrl}/hsk-v${cleanVersion}-x86_64-apple-darwin.tar.gz.sha256`);
   const linuxX64Sha = await getSha256(`${baseUrl}/hsk-v${cleanVersion}-x86_64-unknown-linux-gnu.tar.gz.sha256`);
   const linuxArmSha = await getSha256(`${baseUrl}/hsk-v${cleanVersion}-aarch64-unknown-linux-gnu.tar.gz.sha256`);
 
@@ -44,9 +43,6 @@ class Hsk < Formula
     if Hardware::CPU.arm?
       url "https://github.com/fuyuan9/hsk-search/releases/download/v#{version}/hsk-v#{version}-aarch64-apple-darwin.tar.gz"
       sha256 "${macArmSha}"
-    else
-      url "https://github.com/fuyuan9/hsk-search/releases/download/v#{version}/hsk-v#{version}-x86_64-apple-darwin.tar.gz"
-      sha256 "${macIntelSha}"
     end
   end
 
@@ -78,7 +74,7 @@ end
   const outFile = path.join(outDir, 'hsk.rb');
   fs.writeFileSync(outFile, formulaContent, 'utf-8');
 
-  // Also write to /Users/fuyuan/Desktop/homebrew-tap if present
+  // Also update /Users/fuyuan/Desktop/homebrew-tap if present
   const tapDir = path.resolve('/Users/fuyuan/Desktop/homebrew-tap');
   if (fs.existsSync(tapDir)) {
     const tapFormulaDir = path.join(tapDir, 'Formula');
