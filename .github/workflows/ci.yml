@@ -12,9 +12,9 @@ env:
 jobs:
   fmt:
     name: Code Formatting (rustfmt)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt
@@ -23,9 +23,9 @@ jobs:
 
   clippy:
     name: Static Analysis (Clippy)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy
@@ -35,9 +35,9 @@ jobs:
 
   test:
     name: Unit & Integration Tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - name: Run cargo test
@@ -45,18 +45,18 @@ jobs:
 
   security-audit:
     name: Supply Chain Audit (cargo-deny)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: EmbarkStudios/cargo-deny-action@v2
         with:
           command: check
 
   data-integrity:
     name: Data Integrity Verification (SHA-256)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Verify HSK Data Checksums
         run: |
           if [ -f assets/checksums.sha256 ]; then
