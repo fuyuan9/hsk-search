@@ -12,6 +12,8 @@ This document provides essential technical context, architecture rules, and oper
 - **Phonetic Precision**: Chinese polyphones (多音字, e.g. `银行 yínháng` vs `行走 xíngzǒu`) require context-aware segmentation. TypeScript's `pinyin-pro` achieves 99.85% accuracy.
 - **Runtime Execution**: The application runs in **100% pure Safe Rust** (`#![forbid(unsafe_code)]`). The dataset of 14,041 entries is pre-indexed with `pinyin-pro` and embedded into the binary via `include_str!`.
 - **Performance**: Zero external runtime dependencies (no Node.js/npm needed by end-users), startup time < 5ms, keystroke search latency < 1ms.
+- **Modal Navigation & Mouse**: Vim-inspired modal state machine (`AppMode::Insert` for typing, `AppMode::Normal` for `hjkl` traversal) prevents search-key collisions. Mouse click routing enables direct area switching.
+- **CLI Contract**: Non-interactive flags (`--version`, `--help`) are processed before terminal raw mode initialization to support Homebrew tests and scripted checks.
 
 ---
 
@@ -19,26 +21,32 @@ This document provides essential technical context, architecture rules, and oper
 
 ```
 hsk-search/
-├── .github/workflows/ci.yml # Automated CI pipeline (fmt, clippy, test, audit, data-integrity)
-├── Cargo.toml               # Minimal, strictly vetted dependencies
+├── .github/workflows/
+│   ├── ci.yml               # Automated CI pipeline (fmt, clippy, test, audit, data-integrity)
+│   └── release.yml          # Multi-platform binary release pipeline on v* tags
+├── Cargo.toml               # Minimal, strictly vetted dependencies ([[bin]] name = "hsk")
 ├── Cargo.lock               # Pinned crate versions and cryptographic hashes
 ├── deny.toml                # cargo-deny license and ban policies
 ├── rustfmt.toml             # Code style standards
 ├── LICENSE                  # MIT License (code)
 ├── LICENSE-DATA             # CC BY-SA 4.0 (dataset)
-├── README.md                # User documentation
+├── README.md                # User documentation and keybinding reference
 ├── AGENTS.md                # Guidelines for AI agents (this file)
+├── Formula/
+│   └── hsk.rb               # Local reference Homebrew Formula
 ├── scripts/
 │   ├── package.json         # Pinned pinyin-pro dependency
 │   ├── package-lock.json    # Pinned SHA-512 hashes
 │   ├── fetch_raw_data.mjs   # Downloads raw HSK 3.0 files and generates checksums
-│   └── build_dataset.mjs    # SHA-256 verified data pipeline using pinyin-pro
+│   ├── build_dataset.mjs    # SHA-256 verified data pipeline using pinyin-pro
+│   └── generate_homebrew_formula.mjs # Queries release asset digests and updates Formula/hsk.rb
 ├── assets/
 │   ├── checksums.sha256     # Pinned SHA-256 hashes of all 14 upstream raw data files
 │   └── hsk30_index.json     # Pre-compiled high-precision index (embedded into binary)
 ├── src/
-│   ├── main.rs              # Terminal setup, panic hook, event loop
+│   ├── main.rs              # CLI flag parsing, terminal setup, panic hook, event loop
 │   ├── lib.rs               # Library root exposing modules and dataset loader
+│   ├── app.rs               # App state container, AppMode (Normal/Insert), mouse & key actions
 │   ├── models.rs            # HskItem and EntryKind data structures
 │   ├── search.rs            # High-speed multi-key search engine (Safe Rust)
 │   ├── ui.rs                # Ratatui UI rendering (header, search bar, table, inspector, help)
@@ -85,12 +93,31 @@ Every change must pass all of the following checks before completion:
    ```bash
    cargo test --all-targets --all-features
    ```
-4. **Release Compilation**:
+4. **Supply Chain Audit**:
+   ```bash
+   cargo deny check
+   ```
+5. **Release Compilation**:
    ```bash
    cargo build --release
    ```
 
-### Rule 4: Licensing & Attribution
+### Rule 4: Distribution & Release Pipeline
+
+- **Supported Platforms**:
+  - `aarch64-apple-darwin` (Apple Silicon Mac)
+  - `x86_64-unknown-linux-gnu` (Linux x86_64)
+  - `aarch64-unknown-linux-gnu` (Linux ARM64)
+  - `x86_64-pc-windows-msvc` (Windows x64)
+- **Deliberately Excluded Platforms**:
+  - `x86_64-apple-darwin` (Intel Mac) is **not supported** to avoid long GitHub Actions runner queue times and prioritize modern hardware.
+- **Homebrew Formula Synchronization**:
+  - Formula definitions live in `Formula/hsk.rb` in both this repository and the dedicated tap repository (`fuyuan9/homebrew-tap`).
+  - Use `node scripts/generate_homebrew_formula.mjs <version>` to query GitHub Releases asset digests via `gh release view` and populate formula SHA-256 hashes.
+- **Binary Naming**:
+  - The installed executable binary MUST always be named `hsk` (configured via `[[bin]] name = "hsk"` in `Cargo.toml`).
+
+### Rule 5: Licensing & Attribution
 - All source code is licensed under **MIT** (Copyright (c) 2026 fuyuan9).
 - Dataset assets are licensed under **CC BY-SA 4.0**.
 - Retain proper attributions for the Ministry of Education of PRC, Mani (`krmanik/HSK-3.0`), CC-CEDICT, Pleco, and `pinyin-pro`.
