@@ -44,16 +44,13 @@ jobs:
         run: cargo test --all-targets --all-features --verbose
 
   security-audit:
-    name: Supply Chain Audit (RustSec & cargo-deny)
+    name: Supply Chain Audit (cargo-deny)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: EmbarkStudios/cargo-deny-action@v1
+      - uses: EmbarkStudios/cargo-deny-action@v2
         with:
           command: check
-      - uses: rustsec/audit-check@v1.4.1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
 
   data-integrity:
     name: Data Integrity Verification (SHA-256)
